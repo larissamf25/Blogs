@@ -1,7 +1,7 @@
 const { validateLogin, validateUser } = require('./utils/validateCredentials');
 const userService = require('../services/user.service');
 
-// const error500Message = 'Algo deu errado';
+const error500Message = 'Algo deu errado';
 
 const login = async (req, res, next) => {
   const { error } = validateLogin(req.body);
@@ -28,12 +28,24 @@ const createUser = async (req, res, next) => {
   return res.status(201).json({ ...user });
 };
 
-const getAll = async (_req, _res) => {
-
+const getAll = async (_req, res) => {
+  try {
+    const users = await userService.getAll();
+    return res.status(200).json(users);
+  } catch (e) {
+    res.status(500).json({ message: error500Message });
+  }
 };
 
-const getById = async (_req, _res) => {
-
+const getById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const user = await userService.getById(id);
+    if (!user) return res.status(404).json({ message: 'User does not exist' });
+    return res.status(200).json(user);
+  } catch (e) {
+    res.status(500).json({ message: error500Message });
+  }
 };
 
 module.exports = {

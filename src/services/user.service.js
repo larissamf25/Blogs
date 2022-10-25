@@ -46,7 +46,19 @@ const createUser = async (email, password) => {
   return login(email, password);
 };
 
+const getAll = async () => {
+  const users = await userModel.findAll();
+  return users;
+};
+
+const getById = async (id) => {
+  const user = await userModel.findByPk(id);
+  return user;
+};
+
 module.exports = {
   createUser,
   login,
+  getAll,
+  getById,
 };
