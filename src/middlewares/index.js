@@ -11,7 +11,7 @@ const validateToken = (req, res, next) => {
   }
   try {
     const payload = jwt.verify(token, JWT_SECRET);
-    req.user = payload;
+    req.email = payload;
     return next();
   } catch (err) {
     err.statusCode = 401;

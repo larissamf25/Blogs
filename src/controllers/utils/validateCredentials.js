@@ -1,13 +1,15 @@
 const Joi = require('joi');
 
+const genericRequiredMessage = 'Some required fields are missing';
+
 const validateLogin = (body) =>
   Joi.object({
     email: Joi.string().email().required()
     .messages({
-      'string.required': 'Some required fields are missing',
+      'string.required': genericRequiredMessage,
     }),
     password: Joi.string().messages({
-      'string.required': 'Some required fields are missing',
+      'string.required': genericRequiredMessage,
     }),
   }).validate(body);
 
@@ -27,8 +29,24 @@ const validateUser = (body) => Joi.object({
   }),
   image: Joi.string(),
 }).validate(body);
+
+const validatePost = (body) => Joi.object({
+  title: Joi.string().required()
+  .messages({
+    'string.required': genericRequiredMessage,
+  }),
+  content: Joi.string().messages({
+    'string.required': genericRequiredMessage,
+  }),
+  categoryIds: Joi.array().min(1).required()
+  .messages({
+    'string.required': genericRequiredMessage,
+    'string.min': 'one or more "categoryIds" not found',
+  }),
+}).validate(body);
   
 module.exports = {
   validateLogin,
   validateUser,
+  validatePost,
 };
