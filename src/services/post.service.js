@@ -1,10 +1,14 @@
+const { userService } = require('.');
 const { BlogPost } = require('../models');
 const { PostCategory } = require('../models');
-const { getByEmail } = require('./user.service');
+const categoryService = require('./category.service');
 
 const getAll = async () => {
-  const posts = await BlogPost.findAll();
-  return posts;
+  const posts = await BlogPost.findAll({});
+  const users = await Promise.all(posts.map((post) => userService.getById(post.userId)));
+  const newPosts = posts.map((post, i) => ({ ...post, user: users[i] }));
+  console.log(newPosts);
+  return newPosts;
 };
 
 const getById = async (id) => {
@@ -12,14 +16,19 @@ const getById = async (id) => {
   return post;
 };
 
-const createPost = async (email, { title, content, categoryIds }) => {
-  const { id } = await getByEmail(email);
-  const post = await BlogPost.create({ userId: id, title, content });
-  await Promise.all(categoryIds.forEach((cat) => PostCategory.create({
-    postId: post.id,
+const createPost = async (id, { title, content, categoryIds }) => {
+  const { dataValues } = await BlogPost.create({ userId: id, title, content });
+  const categoryExists = await Promise.all(categoryIds.map((cat) => (
+    categoryService.getById(cat)
+  )));
+  if (categoryExists.includes(null)) {
+    return { type: 'categoryInvalid', message: 'one or more "categoryIds" not found' };
+  }
+  await Promise.all(categoryIds.map((cat) => PostCategory.create({
+    postId: dataValues.id,
     categoryId: cat,
   })));
-  return post;
+  return dataValues;
 };
 
 const updatePost = async (title, content) => {
