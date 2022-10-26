@@ -14,7 +14,6 @@ const login = async (req, res) => {
 };
 
 const createUser = async (req, res) => {
-  // const { displayName, email, password, image } = req.body;
   const { error } = validateUser(req.body);
   if (error) return res.status(400).json({ message: error.message });
 
