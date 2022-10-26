@@ -17,10 +17,10 @@ module.exports = (sequelize, DataTypes) => {
     BlogPost.belongsTo(models.User,
       { foreignKey: 'user_id', as: 'users' });
   };
-  BlogPost.hasMany = (models) => {
+  /*BlogPost.hasMany = (models) => {
     BlogPost.belongsTo(models.PostsCategories,
       { foreignKey: 'post_id', as: 'categories' });
-  };
+  };*/
 
   return BlogPost;
 };

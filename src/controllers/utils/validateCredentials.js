@@ -4,11 +4,11 @@ const genericRequiredMessage = 'Some required fields are missing';
 
 const validateLogin = (body) =>
   Joi.object({
-    email: Joi.string().email().required()
+    email: Joi.string().required()
     .messages({
       'string.required': genericRequiredMessage,
     }),
-    password: Joi.string().messages({
+    password: Joi.string().required().messages({
       'string.required': genericRequiredMessage,
     }),
   }).validate(body);

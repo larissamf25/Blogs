@@ -1,63 +1,45 @@
 const jwt = require('jsonwebtoken');
-const userModel = require('../models/User');
+const { User } = require('../models');
 
 const { JWT_SECRET } = process.env;
 
 const login = async (email, password) => {
-  const user = await userModel.findOne(email);
+  const user = await User.findOne({ where: { email } });
 
   if (!user || user.password !== password) {
-    return {
-      error: {
-        code: 'invalidCredentials',
-        message: 'Invalid fields',
-      },
-    };
+    return { type: 'invalidCredentials', message: 'Invalid fields' };
   }
 
-  const payload = {
-    email,
-    admin: user.admin,
-  };
-
-  const token = jwt.sign(payload, JWT_SECRET, {
-    expiresIn: '1h',
+  const token = jwt.sign({ data: { userId: user.id } }, JWT_SECRET, {
+    expiresIn: '1d', algorithm: 'HS256',
   });
 
-  return { token };
+  return token;
 };
 
-const createUser = async (email, password) => {
-  const userExists = await userModel.findOne(email);
-
+const createUser = async ({ displayName, email, password, image = '' }) => {
+  const userExists = await User.findOne({ where: { email } });
   if (userExists) {
-    return {
-      error: {
-        message: 'User already registered',
-        code: 'userExists',
-      },
-    };
+    return { type: 'userExists', message: 'User already registered' };
   }
 
-  const admin = Math.floor(Math.random() * 100) > 50;
-
-  await userModel.create(email, password, admin);
+  await User.create({ email, password, displayName, image });
 
   return login(email, password);
 };
 
 const getAll = async () => {
-  const users = await userModel.findAll();
+  const users = await User.findAll();
   return users;
 };
 
 const getById = async (id) => {
-  const user = await userModel.findByPk(id);
+  const user = await User.findByPk(id);
   return user;
 };
 
 const getByEmail = async (email) => {
-  const user = await userModel.findAll({ where: { email } });
+  const user = await User.findAll({ where: { email } });
   return user;
 };
 
