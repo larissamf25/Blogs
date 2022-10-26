@@ -24,10 +24,20 @@ const createPost = async (req, res) => {
 };
 
 const updatePost = async (req, res) => {
-  // o post existe
-  // o usuário é dono do post
+  if (!req.body.title || !req.body.content) {
+    return res.status(400).json({ message: 'Some required fields are missing' });
+  }
+
+  const { id } = req.params;
+  const user = await postService.getById(id);
+  
+  if (Number(user.userId) !== Number(req.id)) {
+    return res.status(401).json({ message: 'Unauthorized user' });
+  }
   const { title, content } = req.body;
-  const updatedPost = await postService.updatePost(title, content);
+
+  const updatedPost = await postService.updatePost(id, title, content);
+  if (updatedPost.type) return res.status(404).json({ message: updatedPost.message });
   res.status(200).json(updatedPost);
 };
 

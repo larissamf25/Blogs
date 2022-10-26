@@ -1,18 +1,29 @@
-const { userService } = require('.');
+const { User } = require('../models');
 const { BlogPost } = require('../models');
+const { Category } = require('../models');
 const { PostCategory } = require('../models');
 const categoryService = require('./category.service');
 
 const getAll = async () => {
-  const posts = await BlogPost.findAll({});
-  const users = await Promise.all(posts.map((post) => userService.getById(post.userId)));
-  const newPosts = posts.map((post, i) => ({ ...post, user: users[i] }));
-  console.log(newPosts);
-  return newPosts;
+  const posts = await BlogPost.findAll({
+    include: [
+      { model: User, as: 'user', attributes: { exclude: ['password'] } },
+      { model: Category, as: 'categories' },
+    ],
+  });
+  console.log(posts);
+  return posts;
 };
 
 const getById = async (id) => {
-  const post = await BlogPost.findByPk(id);
+  const post = await BlogPost.findByPk(
+    id, {
+    include: [
+      { model: User, as: 'user', attributes: { exclude: ['password'] } },
+      { model: Category, as: 'categories' },
+    ],
+    },
+  );
   return post;
 };
 
@@ -31,8 +42,15 @@ const createPost = async (id, { title, content, categoryIds }) => {
   return dataValues;
 };
 
-const updatePost = async (title, content) => {
-  console.log(title, content);
+const updatePost = async (id, title, content) => {
+  await PostCategory.update({ title, content }, { where: { id } });
+  const oldPost = await BlogPost.findByPk(id, {
+    include: [
+      { model: Category, as: 'categories' },
+    ],
+  });
+  const updatedPost = { ...JSON.stringify(oldPost), title, content };
+  return updatedPost;
 };
 
 module.exports = {

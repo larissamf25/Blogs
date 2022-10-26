@@ -31,11 +31,11 @@ const validateUser = (body) => Joi.object({
 }).validate(body);
 
 const validatePost = (body) => Joi.object({
-  title: Joi.string().required()
+  title: Joi.string().min(1).required()
   .messages({
     'string.required': genericRequiredMessage,
   }),
-  content: Joi.string().messages({
+  content: Joi.string().min(1).messages({
     'string.required': genericRequiredMessage,
   }),
   categoryIds: Joi.array().min(1).required()
