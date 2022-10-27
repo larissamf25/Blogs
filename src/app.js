@@ -6,6 +6,7 @@ const app = express();
 
 app.use(express.json());
 
+app.get('/post/search', validateToken, postController.getBySearch);
 app.post('/login', userController.login);
 app.post('/user', userController.createUser);
 app.post('/categories', validateToken, categoryController.createCategory);
@@ -16,5 +17,7 @@ app.get('/categories', validateToken, categoryController.getAll);
 app.get('/post', validateToken, postController.getAll);
 app.get('/post/:id', validateToken, postController.getById);
 app.put('/post/:id', validateToken, postController.updatePost);
+app.delete('/post/:id', validateToken, postController.deletePost);
+app.delete('/user/me', validateToken, userController.deleteUser);
 
 module.exports = app;

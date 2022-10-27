@@ -1,3 +1,6 @@
+const Sequelize = require('sequelize');
+
+const { Op } = Sequelize;
 const { User } = require('../models');
 const { BlogPost } = require('../models');
 const { Category } = require('../models');
@@ -11,7 +14,6 @@ const getAll = async () => {
       { model: Category, as: 'categories' },
     ],
   });
-  console.log(posts);
   return posts;
 };
 
@@ -25,6 +27,22 @@ const getById = async (id) => {
     },
   );
   return post;
+};
+
+const getBySearch = async (query) => {
+  const posts = await BlogPost.findAll({
+    where: {
+      [Op.or]: [
+        { title: { [Op.like]: query } },
+        { content: { [Op.like]: query } },
+      ],
+    },
+    include: [
+      { model: User, as: 'user', attributes: { exclude: ['password'] } },
+      { model: Category, as: 'categories' },
+    ],
+  });
+  return posts;
 };
 
 const createPost = async (id, { title, content, categoryIds }) => {
@@ -43,14 +61,14 @@ const createPost = async (id, { title, content, categoryIds }) => {
 };
 
 const updatePost = async (id, title, content) => {
-  await PostCategory.update({ title, content }, { where: { id } });
-  const oldPost = await BlogPost.findByPk(id, {
-    include: [
-      { model: Category, as: 'categories' },
-    ],
-  });
-  const updatedPost = { ...JSON.stringify(oldPost), title, content };
-  return updatedPost;
+  const [updatedPost] = await BlogPost.update({ title, content }, { where: { id } });
+  const result = await getById(updatedPost);
+  return result;
+};
+
+const deletePost = async (id) => {
+  const result = await BlogPost.destroy({ where: { id } });
+  return result;
 };
 
 module.exports = {
@@ -58,4 +76,6 @@ module.exports = {
   getAll,
   getById,
   updatePost,
+  deletePost,
+  getBySearch,
 };
