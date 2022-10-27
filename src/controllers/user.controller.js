@@ -5,12 +5,11 @@ const error500Message = 'Algo deu errado';
 
 const login = async (req, res) => {
   const { error } = validateLogin(req.body);
-  console.log(error);
   if (error) return res.status(400).json({ message: 'Some required fields are missing' });
   const { email, password } = req.body;
   const user = await userService.login(email, password);
-  if (user.type) res.status(400).json({ message: user.message });
-  res.status(200).json({ token: user });
+  if (user.type) return res.status(400).json({ message: user.message });
+  return res.status(200).json({ token: user });
 };
 
 const createUser = async (req, res) => {
@@ -18,7 +17,7 @@ const createUser = async (req, res) => {
   if (error) return res.status(400).json({ message: error.message });
 
   const user = await userService.createUser(req.body);
-  if (user.type) return res.status(409).json({ message: user.message });
+  if (user.type === 'userExists') return res.status(409).json({ message: user.message });
 
   return res.status(201).json({ token: user });
 };

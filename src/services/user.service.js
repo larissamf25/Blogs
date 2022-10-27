@@ -4,9 +4,9 @@ const { User } = require('../models');
 const { JWT_SECRET } = process.env;
 
 const login = async (email, password) => {
-  const user = await User.findOne({ where: { email } });
+  const user = await User.findOne({ where: { email, password } });
 
-  if (!user || user.password !== password) {
+  if (!user) {
     return { type: 'invalidCredentials', message: 'Invalid fields' };
   }
 
